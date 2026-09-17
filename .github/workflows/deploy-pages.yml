@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main # Corrected to our branch name
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -22,6 +23,25 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Fetch all history for git info
+
+      # --- New steps: pull just the public-facing folder out of the ---
+      # --- private work-projects repo, nothing else in that vault.  ---
+      - name: Checkout vault content (private work-projects, 40 SemanticGIS only)
+        uses: actions/checkout@v6
+        with:
+          repository: Esbern/work-projects
+          token: ${{ secrets.WORK_PROJECTS_PAT }}
+          path: _vault-src
+          sparse-checkout: |
+            40 SemanticGIS
+
+      - name: Sync vault content into Quartz content/
+        run: |
+          rm -rf content
+          mkdir -p content
+          rsync -a --delete "_vault-src/40 SemanticGIS/" content/
+          rm -rf _vault-src
+      # --- End of new steps. ---
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
