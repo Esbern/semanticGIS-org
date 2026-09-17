@@ -39,7 +39,7 @@ jobs:
         run: |
           rm -rf content
           mkdir -p content
-          rsync -a --delete "_vault-src/40 SemanticGIS/" content/
+          rsync -a --delete --exclude="Data/templates/" "_vault-src/40 SemanticGIS/" content/
           rm -rf _vault-src
       # --- End of new steps. ---
 
