@@ -1,4 +1,0 @@
-concept: acquire_dtm_elevation
-required_format: GeoTIFF
-spatial_reference: EPSG:25832
-description: "Elevation raster covering Denmark from the national mapping authority"

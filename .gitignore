@@ -1,17 +1,16 @@
-# Local working data (never versioned)
-data/**
-!data/.gitkeep
-
-# Python cache
-__pycache__/
-*.py[cod]
-
 # macOS
 .DS_Store
 
-# Keep nested sites and experiment repos isolated from top-level git history
-DanishData/
-projects/*/
-!projects/readme.md
-!projects/semanticGIS-template/
+# Dependencies
 node_modules
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Build output
+public/
+.quartz-cache/
+
+# Site content is synced in from the work-projects vault by the deploy
+# workflow at build time - never committed here (see README.md)
+content/
