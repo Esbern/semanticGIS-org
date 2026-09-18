@@ -10,16 +10,21 @@ deploy (see below).
 
 The published content comes from the `40 SemanticGIS/` folder of the private
 [`Esbern/work-projects`](https://github.com/Esbern/work-projects) vault repo. It is **not**
-committed to this repo — `content/` is gitignored and only ever exists locally (for local
-preview) or transiently inside a GitHub Actions run.
+committed to this repo — `content/` is left untracked (see the note in `.gitignore` about why
+it's deliberately *not* gitignored) and only ever exists locally (for local preview) or
+transiently inside a GitHub Actions run.
 
 On every deploy, the workflow:
 
 1. Checks out this repo.
-2. Does a sparse, read-only checkout of `Esbern/work-projects`, limited to the `40 SemanticGIS/`
-   folder only (nothing else in that private vault is ever fetched).
-3. `rsync`s that folder into `content/` here (excluding `Data/templates/`, which holds Obsidian
-   plugin templates, not real content).
+2. Does a sparse, read-only checkout of `Esbern/work-projects` in cone mode, scoped to the
+   `40 SemanticGIS/` folder. Note: git's cone-mode sparse-checkout always includes root-level
+   *files* of the source repo regardless of scope (e.g. the vault's own `CLAUDE.md`) - a handful
+   of those exist transiently on the runner's disk during the job. They are never copied into
+   `content/` (the next step only pulls from `40 SemanticGIS/` specifically) and so never reach
+   the published site, but it's worth knowing about if the scoping needs to be airtight.
+3. `rsync`s the `40 SemanticGIS/` folder into `content/` here (excluding `Data/templates/`,
+   which holds Obsidian plugin templates, not real content).
 4. Builds the Quartz site and deploys it to GitHub Pages.
 
 So `content/` in this repo is always a rebuilt mirror of the vault's `40 SemanticGIS/` folder at
@@ -53,9 +58,9 @@ Everything is in a single file: [`.github/workflows/deploy-pages.yml`](.github/w
 
 ## Local development
 
-`content/` is gitignored and empty by default (it's populated by the deploy workflow, not
-committed). To preview locally, sync a copy of the vault's `40 SemanticGIS/` folder into
-`content/` yourself, e.g.:
+`content/` is untracked and empty by default (it's populated by the deploy workflow, not
+committed, and deliberately not gitignored - see `.gitignore`). To preview locally, sync a copy
+of the vault's `40 SemanticGIS/` folder into `content/` yourself, e.g.:
 
 ```sh
 rsync -a --delete --exclude="Data/templates/" "/path/to/work-projects/40 SemanticGIS/" content/

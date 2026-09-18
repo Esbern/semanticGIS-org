@@ -11,6 +11,8 @@ node_modules
 public/
 .quartz-cache/
 
-# Site content is synced in from the work-projects vault by the deploy
-# workflow at build time - never committed here (see README.md)
-content/
+# NOTE: content/ is intentionally NOT listed here. It's synced in from the
+# work-projects vault by the deploy workflow at build time and is not
+# committed (see README.md) - but it must not be gitignored either, since
+# Quartz's own content crawler (quartz/util/glob.ts) respects .gitignore
+# and would otherwise treat the whole folder as excluded from the build.
