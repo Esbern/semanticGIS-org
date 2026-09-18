@@ -51,7 +51,12 @@ jobs:
       - name: Sync vault content into Quartz content/
         run: |
           mkdir -p content
-          rsync -a --delete --exclude="Data/templates/" "_vault-src/40 SemanticGIS/" content/
+          rsync -av --delete --exclude="Data/templates/" "_vault-src/40 SemanticGIS/" content/ | tail -20
+          echo "--- rsync exit: $? ---"
+          echo "--- content/ after rsync ---"
+          find content -maxdepth 1
+          echo "--- content file count ---"
+          find content -type f | wc -l
           rm -rf _vault-src
       # --- End of new steps. ---
 
