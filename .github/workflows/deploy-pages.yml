@@ -35,6 +35,19 @@ jobs:
           sparse-checkout: |
             40 SemanticGIS
 
+      - name: DEBUG - inspect checked out vault
+        run: |
+          pwd
+          echo "--- ls _vault-src ---"
+          ls -la _vault-src || true
+          echo "--- ls '_vault-src/40 SemanticGIS' ---"
+          ls -la "_vault-src/40 SemanticGIS" || true
+          echo "--- file count ---"
+          find "_vault-src/40 SemanticGIS" -type f | wc -l || true
+          echo "--- git status in _vault-src ---"
+          git -C _vault-src status || true
+          git -C _vault-src sparse-checkout list || true
+
       - name: Sync vault content into Quartz content/
         run: |
           mkdir -p content
