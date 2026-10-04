@@ -5,6 +5,10 @@ on:
     branches:
       - main # Corrected to our branch name
   workflow_dispatch: {}
+  # Nightly rebuild, so vault changes (Obsidian Git backups to work-projects) go live
+  # without a manual run. 01:30 UTC is 02:30/03:30 Danish time.
+  schedule:
+    - cron: "30 1 * * *"
 
 permissions:
   contents: read
@@ -18,6 +22,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    env:
+      # The build guard below runs only when this secret exists (a token that can read
+      # the private semanticGIS-code repo).
+      HAS_CODE_TOKEN: ${{ secrets.SEMANTICGIS_CODE_PAT != '' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -35,17 +43,36 @@ jobs:
           sparse-checkout: |
             40 SemanticGIS
 
-      - name: Sync vault content into Quartz content/
-        run: |
-          mkdir -p content
-          rsync -a --delete --exclude="Data/templates/" "_vault-src/40 SemanticGIS/" content/
-          rm -rf _vault-src
-      # --- End of new steps. ---
-
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
           node-version: 22
+
+      # --- Build guard: refuse to publish a stale SPHERE index or stale generated pages. ---
+      - name: Checkout semanticGIS-code (build guard)
+        if: env.HAS_CODE_TOKEN == 'true'
+        uses: actions/checkout@v6
+        with:
+          repository: Esbern/semanticGIS-code
+          token: ${{ secrets.SEMANTICGIS_CODE_PAT }}
+          path: _code
+
+      - name: Check SPHERE index and generated pages are up to date
+        if: env.HAS_CODE_TOKEN == 'true'
+        working-directory: _code
+        env:
+          SEMANTICGIS_VAULT: ${{ github.workspace }}/_vault-src/40 SemanticGIS
+        run: |
+          npm ci --silent
+          npm run sphere:check
+      # --- End of build guard. ---
+
+      - name: Sync vault content into Quartz content/
+        run: |
+          mkdir -p content
+          rsync -a --delete --exclude="Data/templates/" "_vault-src/40 SemanticGIS/" content/
+          rm -rf _vault-src _code
+      # --- End of new steps. ---
 
       - name: Install Dependencies
         run: npm ci
