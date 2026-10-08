@@ -14,6 +14,14 @@ export const sharedPageComponents: SharedLayout = {
   }),
 }
 
+// Leaves, Realisations and templates are reached through SPHERE, the dataset folders and
+// links rather than browsed as folders, so the Explorer hides them (their pages stay
+// published). The filter is serialised to the browser, so it must be self-contained.
+const explorer = () =>
+  Component.Explorer({
+    filterFn: (node) => !["tags", "Leaves", "Realisations", "templates"].includes(node.slugSegment),
+  })
+
 // components for pages that display a single page (e.g. a single note)
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
@@ -38,7 +46,7 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.ReaderMode() },
       ],
     }),
-    Component.Explorer(),
+    explorer(),
   ],
   right: [
     Component.Graph(),
@@ -62,7 +70,7 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
-    Component.Explorer(),
+    explorer(),
   ],
   right: [],
 }
