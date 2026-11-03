@@ -13,6 +13,10 @@ configuration:
     - private
     - templates
     - .obsidian
+    # Excalidraw drawings are left out until the Excalidraw page plugin is installed;
+    # without it they would render as raw text.
+    - "**/*.excalidraw.md"
+    - "**/*.excalidraw"
   theme:
     fontOrigin: googleFonts
     cdnCaching: true
