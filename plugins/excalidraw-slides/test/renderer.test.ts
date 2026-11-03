@@ -132,7 +132,7 @@ describe("slides", () => {
     const elements = [frame("a", "Second", 0, 1), frame("b", "Not shown", 200), frame("c", "First", 400, 0)];
     const result = renderToSvg({ type: "excalidraw", version: 2, elements, appState: {}, files: {} } as never, {});
     expect(result.slides.map((s) => s.name)).toEqual(["First", "Second"]);
-    expect(result.slides[0].x).toBe(400 + result.viewBox.offsetX);
+    expect(result.slides[0]?.x).toBe(400 + result.viewBox.offsetX);
     expect(result.svg).toContain('class="excalidraw-frame-outline"');
   });
 

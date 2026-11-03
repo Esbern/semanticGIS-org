@@ -4643,6 +4643,17 @@ function u4(e4, t4, n4, o4, i4, u5) {
 function stripTranscludes(html5) {
   return html5.replace(/<blockquote[^>]*class="[^"]*transclude[^"]*"[^>]*>[\s\S]*?<\/blockquote>/gi, "").replace(/<div[^>]*class="[^"]*transclude[^"]*"[^>]*>[\s\S]*?<\/div>/gi, "");
 }
+function findPage(target, allFiles) {
+  if (!target) return void 0;
+  const file = /\.md$/i.test(target) ? target : target + ".md";
+  const slug2 = slugifyFilePath(file);
+  const withSlug = (wanted) => allFiles.filter((f5) => f5.slug && (f5.slug === wanted || f5.slug.endsWith("/" + wanted)));
+  const matches = withSlug(slug2);
+  if (matches.length > 0) {
+    return matches.sort((a4, b4) => a4.slug.split("/").length - b4.slug.split("/").length)[0];
+  }
+  return withSlug(slug2 + "/index")[0];
+}
 function resolveEmbeds(data, currentSlug, allFiles) {
   const result = {};
   const embeddables = data.elements.filter(
@@ -4651,14 +4662,9 @@ function resolveEmbeds(data, currentSlug, allFiles) {
   for (const el of embeddables) {
     const link = el.link ?? "";
     if (!link.startsWith("[[")) continue;
-    const target = link.replace(/^\[\[/, "").replace(/\]\]$/, "");
-    const targetLower = target.toLowerCase();
-    const page = allFiles.find((f5) => {
-      if (!f5.slug) return false;
-      if (f5.slug === targetLower) return true;
-      const lastSegment = f5.slug.split("/").pop();
-      return lastSegment === targetLower;
-    });
+    const inner = link.replace(/^\[\[/, "").replace(/\]\]$/, "");
+    const target = (inner.split("|")[0] ?? "").split("#")[0]?.trim() ?? "";
+    const page = findPage(target, allFiles);
     const pageSlug = page?.slug ?? slugifyFilePath(target);
     const href = resolveRelative(currentSlug, pageSlug);
     if (!page || !page.htmlAst) {

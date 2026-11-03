@@ -25,6 +25,26 @@ function stripTranscludes(html: string): string {
     .replace(/<div[^>]*class="[^"]*transclude[^"]*"[^>]*>[\s\S]*?<\/div>/gi, "");
 }
 
+/**
+ * The page a wikilink points to, found the way Obsidian finds it: by its path, or by its name
+ * anywhere in the vault. The target is slugified like Quartz's own links ("C - Design Rationale"
+ * becomes "c---design-rationale"), so it can be compared with the pages' slugs.
+ */
+function findPage(target: string, allFiles: QuartzPluginData[]): QuartzPluginData | undefined {
+  if (!target) return undefined;
+  const file = /\.md$/i.test(target) ? target : target + ".md";
+  const slug = slugifyFilePath(file as FilePath) as string;
+  const withSlug = (wanted: string) =>
+    allFiles.filter((f) => f.slug && (f.slug === wanted || f.slug.endsWith("/" + wanted)));
+  const matches = withSlug(slug);
+  if (matches.length > 0) {
+    // Shortest path first, as Obsidian resolves an ambiguous name.
+    return matches.sort((a, b) => a.slug!.split("/").length - b.slug!.split("/").length)[0];
+  }
+  // A folder note (QGIS/QGIS.md) is published as the folder's index.
+  return withSlug(slug + "/index")[0];
+}
+
 function resolveEmbeds(
   data: ExcalidrawData,
   currentSlug: FullSlug,
@@ -39,15 +59,9 @@ function resolveEmbeds(
     const link = (el.link as string) ?? "";
     if (!link.startsWith("[[")) continue;
 
-    const target = link.replace(/^\[\[/, "").replace(/\]\]$/, "");
-    const targetLower = target.toLowerCase();
-
-    const page = allFiles.find((f) => {
-      if (!f.slug) return false;
-      if (f.slug === targetLower) return true;
-      const lastSegment = f.slug.split("/").pop();
-      return lastSegment === targetLower;
-    });
+    const inner = link.replace(/^\[\[/, "").replace(/\]\]$/, "");
+    const target = (inner.split("|")[0] ?? "").split("#")[0]?.trim() ?? "";
+    const page = findPage(target, allFiles);
 
     const pageSlug = (page?.slug ?? slugifyFilePath(target as FilePath)) as FullSlug;
     const href = resolveRelative(currentSlug, pageSlug);
