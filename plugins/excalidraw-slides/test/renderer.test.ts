@@ -133,7 +133,7 @@ describe("slides", () => {
     const result = renderToSvg({ type: "excalidraw", version: 2, elements, appState: {}, files: {} } as never, {});
     expect(result.slides.map((s) => s.name)).toEqual(["First", "Second"]);
     expect(result.slides[0].x).toBe(400 + result.viewBox.offsetX);
-    expect(result.svg).toContain('class="excalidraw-frame"');
+    expect(result.svg).toContain('class="excalidraw-frame-outline"');
   });
 
   it("uses all frames in drawing order when none has a slideshow order", () => {

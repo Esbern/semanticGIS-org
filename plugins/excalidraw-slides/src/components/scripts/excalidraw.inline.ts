@@ -191,32 +191,22 @@ function initPanZoom(page) {
   }
   var current = -1;
   var counter = page.querySelector(".excalidraw-slide-counter");
-  svg.style.transformOrigin = "50% 50%";
+
+  // A slide sets the SVG's viewBox to the frame (plus a small margin): the browser then fits the
+  // frame to the window exactly as it fits the whole drawing, so no zoom arithmetic is needed.
+  var fullViewBox = svg.getAttribute("viewBox");
 
   function fitSlide(i) {
     var slide = slides[i];
-    if (!slide) return;
-    // Measure the frame on screen with no zoom or pan, then work out the zoom and pan that
-    // fit it to the container (the transform scales around the SVG's centre).
+    if (!slide || slide.width <= 0 || slide.height <= 0) return;
+    var m = Math.max(slide.width, slide.height) * 0.025;
+    svg.setAttribute(
+      "viewBox",
+      slide.x - m + " " + (slide.y - m) + " " + (slide.width + 2 * m) + " " + (slide.height + 2 * m),
+    );
     zoom = 1;
     panX = 0;
     panY = 0;
-    svg.style.transform = "none";
-    var ctm = svg.getScreenCTM();
-    if (!ctm) return;
-    var box = container.getBoundingClientRect();
-    var svgBox = svg.getBoundingClientRect();
-    var left = slide.x * ctm.a + ctm.e;
-    var top = slide.y * ctm.d + ctm.f;
-    var w = slide.width * ctm.a;
-    var h = slide.height * ctm.d;
-    if (w <= 0 || h <= 0) return;
-    var z = Math.min(box.width / w, box.height / h) * 0.95;
-    var ox = svgBox.left + svgBox.width / 2;
-    var oy = svgBox.top + svgBox.height / 2;
-    zoom = z;
-    panX = box.left + box.width / 2 - ox - z * (left + w / 2 - ox);
-    panY = box.top + box.height / 2 - oy - z * (top + h / 2 - oy);
     applyTransform();
   }
 
@@ -230,6 +220,7 @@ function initPanZoom(page) {
 
   function leaveSlides() {
     current = -1;
+    if (fullViewBox) svg.setAttribute("viewBox", fullViewBox);
     page.classList.remove("excalidraw-presenting");
     if (counter) counter.textContent = slides.length + " slides";
     zoom = 1;

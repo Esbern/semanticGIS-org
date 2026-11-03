@@ -528,7 +528,7 @@ function renderImage(el: ExcalidrawElement, data: ExcalidrawData, ctx?: RenderCo
 }
 
 function renderFrame(el: ExcalidrawElement): string {
-  return `<rect class="excalidraw-frame" x="${el.x}" y="${el.y}" width="${el.width}" height="${el.height}" fill="none" stroke="#aaaaaa" stroke-width="1" stroke-dasharray="5 5" />`;
+  return `<rect class="excalidraw-frame-outline" x="${el.x}" y="${el.y}" width="${el.width}" height="${el.height}" fill="none" stroke="#aaaaaa" stroke-width="1" stroke-dasharray="5 5" />`;
 }
 
 function renderEmbeddable(el: ExcalidrawElement): string {
