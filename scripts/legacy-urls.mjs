@@ -21,7 +21,7 @@ import { fileURLToPath } from "node:url"
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const out = path.resolve(process.argv[2] ?? "public")
-const legacy = fs.readFileSync(path.join(here, "legacy-urls.txt"), "utf8").split("\n").filter(Boolean)
+const legacy = fs.readFileSync(path.join(here, "legacy-urls.txt"), "utf8").split("\n").filter(Boolean).map((rel) => rel.normalize("NFC"))
 
 function exists(rel) {
   // A case-sensitive check, so Data/x is not taken for data/x on a case-insensitive disk.
@@ -33,8 +33,10 @@ function exists(rel) {
     } catch {
       return false
     }
-    if (!names.includes(segment)) return false
-    dir = path.join(dir, segment)
+    // macOS and Linux may spell å, æ, ø with different byte sequences (NFD/NFC).
+    const name = names.find((n) => n.normalize("NFC") === segment)
+    if (!name) return false
+    dir = path.join(dir, name)
   }
   return true
 }
@@ -47,6 +49,15 @@ function target(rel) {
   }
   const candidate = segments.join("/")
   return exists(candidate) ? candidate : null
+}
+
+function onDisk(rel) {
+  // The path as the file system spells it, for copying.
+  let dir = out
+  for (const segment of rel.split("/")) {
+    dir = path.join(dir, fs.readdirSync(dir).find((n) => n.normalize("NFC") === segment))
+  }
+  return dir
 }
 
 function redirectPage(to) {
@@ -76,7 +87,7 @@ for (const rel of legacy) {
     fs.writeFileSync(dest, redirectPage(to))
     redirects++
   } else {
-    fs.copyFileSync(path.join(out, to), dest)
+    fs.copyFileSync(onDisk(to), dest)
     copies++
   }
 }
