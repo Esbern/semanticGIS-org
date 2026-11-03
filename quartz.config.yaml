@@ -13,10 +13,6 @@ configuration:
     - private
     - templates
     - .obsidian
-    # Excalidraw drawings are left out until the Excalidraw page plugin is installed;
-    # without it they would render as raw text.
-    - "**/*.excalidraw.md"
-    - "**/*.excalidraw"
   theme:
     fontOrigin: googleFonts
     cdnCaching: true
@@ -262,6 +258,13 @@ plugins:
       position: afterBody
       priority: 50
       display: all
+  - source: github:quartz-community/obsidian-plugin-excalidraw
+    enabled: true
+    options:
+      enableInteraction: true
+      darkMode: auto
+      exportPadding: 20
+    order: 50
 layout:
   groups:
     toolbar:
