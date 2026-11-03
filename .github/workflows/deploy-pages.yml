@@ -1,0 +1,104 @@
+name: Deploy Quartz site to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+  # Nightly rebuild, so vault changes (Obsidian Git backups to work-projects) go live
+  # without a manual run. 01:30 UTC is 02:30/03:30 Danish time.
+  schedule:
+    - cron: "30 1 * * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      # The build guard below runs only when this secret exists (a token that can read
+      # the private semanticGIS-code repo).
+      HAS_CODE_TOKEN: ${{ secrets.SEMANTICGIS_CODE_PAT != '' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Fetch all history for git info
+
+      # --- New steps: pull just the public-facing folder out of the ---
+      # --- private work-projects repo, nothing else in that vault.  ---
+      - name: Checkout vault content (private work-projects, 40 SemanticGIS only)
+        uses: actions/checkout@v6
+        with:
+          repository: Esbern/work-projects
+          token: ${{ secrets.WORK_PROJECTS_PAT }}
+          path: _vault-src
+          sparse-checkout: |
+            40 SemanticGIS
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # --- Build guard: refuse to publish a stale SPHERE index or stale generated pages. ---
+      - name: Checkout semanticGIS-code (build guard)
+        if: env.HAS_CODE_TOKEN == 'true'
+        uses: actions/checkout@v6
+        with:
+          repository: Esbern/semanticGIS-code
+          token: ${{ secrets.SEMANTICGIS_CODE_PAT }}
+          path: _code
+
+      - name: Check SPHERE index and generated pages are up to date
+        if: env.HAS_CODE_TOKEN == 'true'
+        working-directory: _code
+        env:
+          SEMANTICGIS_VAULT: ${{ github.workspace }}/_vault-src/40 SemanticGIS
+        run: |
+          npm ci --silent
+          npm run sphere:check
+      # --- End of build guard. ---
+
+      - name: Sync vault content into Quartz content/
+        run: |
+          mkdir -p content
+          rsync -a --delete --exclude="Data/templates/" "_vault-src/40 SemanticGIS/" content/
+          rm -rf _vault-src _code
+      # --- End of new steps. ---
+
+      - name: Install dependencies and Quartz plugins
+        run: |
+          npm ci
+          npx quartz plugin install
+
+      - name: Build Quartz
+        run: npx quartz build
+
+      # Quartz 5 lowercases every address; keep the Quartz 4 ones (the QGIS plugin's
+      # /Data/assets/ catalogue, reference GeoPackages, scripts, old page links) working.
+      - name: Keep the Quartz 4 addresses working
+        run: node scripts/legacy-urls.mjs public
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
