@@ -1,18 +1,14 @@
-# macOS
 .DS_Store
-
-# Dependencies
+.gitignore
 node_modules
-
-# TypeScript incremental build cache
-*.tsbuildinfo
-
-# Build output
-public/
-.quartz-cache/
-
-# NOTE: content/ is intentionally NOT listed here. It's synced in from the
-# work-projects vault by the deploy workflow at build time and is not
-# committed (see README.md) - but it must not be gitignored either, since
-# Quartz's own content crawler (quartz/util/glob.ts) respects .gitignore
-# and would otherwise treat the whole folder as excluded from the build.
+public
+prof
+tsconfig.tsbuildinfo
+.obsidian
+.quartz-cache
+private/
+.replit
+replit.nix
+.quartz/
+quartz/cli/tui/dist/
+.turbo/
