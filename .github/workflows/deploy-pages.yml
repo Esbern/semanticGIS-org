@@ -77,7 +77,7 @@ jobs:
       - name: Install dependencies and Quartz plugins
         run: |
           npm ci
-          npx quartz plugin install
+          npx quartz plugin install --from-config
 
       - name: Build Quartz
         run: npx quartz build

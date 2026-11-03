@@ -258,7 +258,9 @@ plugins:
       position: afterBody
       priority: 50
       display: all
-  - source: github:quartz-community/obsidian-plugin-excalidraw
+  # Copy of github:quartz-community/obsidian-plugin-excalidraw (MIT) with a slideshow:
+  # steps through the drawing's frames in the order set in Obsidian Excalidraw.
+  - source: ./plugins/excalidraw-slides
     enabled: true
     options:
       enableInteraction: true
