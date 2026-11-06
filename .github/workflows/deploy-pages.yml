@@ -35,7 +35,7 @@ jobs:
       # --- New steps: pull just the public-facing folder out of the ---
       # --- private work-projects repo, nothing else in that vault.  ---
       - name: Checkout vault content (private work-projects, 40 SemanticGIS only)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: Esbern/work-projects
           token: ${{ secrets.WORK_PROJECTS_PAT }}
@@ -51,7 +51,7 @@ jobs:
       # --- Build guard: refuse to publish a stale SPHERE index or stale generated pages. ---
       - name: Checkout semanticGIS-code (build guard)
         if: env.HAS_CODE_TOKEN == 'true'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: Esbern/semanticGIS-code
           token: ${{ secrets.SEMANTICGIS_CODE_PAT }}
