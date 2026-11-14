@@ -13,7 +13,7 @@ Published at https://semanticgis.org/the-technology-stack/processing-environment
 Build locally (needs the micromamba binary on PATH):
 
 ```sh
-micromamba create -n jlite -c conda-forge python=3.12 pip jupyterlite-core=0.8.7 jupyterlite-xeus=6.0.0
+micromamba create -n jlite -c conda-forge python=3.12 pip jupyterlite-core=0.8.7 jupyterlite-xeus=6.0.0 jupyter_server
 micromamba run -n jlite pip install jupytergis-lite==0.18.1
 cd jupyterlite && micromamba run -n jlite jupyter lite build --contents content --output-dir _output
 python -m http.server -d _output 8765

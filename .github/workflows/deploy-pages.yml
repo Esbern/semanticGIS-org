@@ -93,7 +93,7 @@ jobs:
         with:
           environment-name: jupyterlite-build
           create-args: >-
-            python=3.12 pip jupyterlite-core=0.8.7 jupyterlite-xeus=6.0.0
+            python=3.12 pip jupyterlite-core=0.8.7 jupyterlite-xeus=6.0.0 jupyter_server
           init-shell: bash
           cache-environment: true
 
