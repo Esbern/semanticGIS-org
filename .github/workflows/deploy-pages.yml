@@ -87,6 +87,28 @@ jobs:
       - name: Keep the Quartz 4 addresses working
         run: node scripts/legacy-urls.mjs public
 
+      # --- JupyterLite with JupyterGIS: Python in the browser for students (source in jupyterlite/). ---
+      - name: Set up micromamba for the JupyterLite build
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: jupyterlite-build
+          create-args: >-
+            python=3.12 pip jupyterlite-core=0.8.7 jupyterlite-xeus=6.0.0
+          init-shell: bash
+          cache-environment: true
+
+      - name: Build the JupyterLite site
+        working-directory: jupyterlite
+        shell: bash -el {0}
+        run: |
+          # jupyterlite-xeus creates the browser kernel's environment with the micromamba binary
+          export PATH="$(dirname "$MAMBA_EXE"):$PATH"
+          pip install --quiet "jupytergis-lite==0.18.1"
+          jupyter lite build --contents content \
+            --output-dir ../public/the-technology-stack/processing-environments/jupytergis/lite
+          test -f ../public/the-technology-stack/processing-environments/jupytergis/lite/xeus/kernels.json
+      # --- End of JupyterLite. ---
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:

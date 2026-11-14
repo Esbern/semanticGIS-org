@@ -1,0 +1,28 @@
+name: xeus-python-kernel
+channels:
+  - https://prefix.dev/emscripten-forge-4x
+  - conda-forge
+dependencies:
+  - python=3.13
+  - pip
+  - xeus-python
+  # geospatial Python for the exercises
+  - shapely
+  - pyproj
+  - pyogrio
+  - geopandas
+  - matplotlib
+  # JupyterGIS's Python API
+  - requests
+  - webcolors
+  - jupyter_ydoc=2.1.5
+  - ypywidgets>=0.9.6,<0.10.0
+  - comm>=0.1.2,<0.2.0
+  - pydantic>=2,<3
+  - py2vega>=0.7.0
+  - sidecar
+  - pip:
+      - yjs-widgets>=0.6,<0.7
+      - jupytergis_core==0.18.1
+      - jupytergis_lab==0.18.1
+      - jupytergis-lite==0.18.1   # provides the module name `jupytergis`
